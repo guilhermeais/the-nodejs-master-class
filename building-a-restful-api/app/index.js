@@ -5,10 +5,23 @@
 
 // Depedencies
 const http = require("http");
+const url = require("url");
 
 // The server should respond to all request with a string
+
 const server = http.createServer(function (request, response) {
+  // Get the URL and parse it
+  const parsedUrl = url.parse(request.url, true);
+
+  // Get the path
+  const path = parsedUrl.pathname;
+  const trimmedPath = path.trim()
+  
+  // Send the response
   response.end("Hello World\n");
+
+  // Log the request path
+  console.log('Request received on path: ', trimmedPath);
 });
 
 // Start the server, and have it listen on port 3000
