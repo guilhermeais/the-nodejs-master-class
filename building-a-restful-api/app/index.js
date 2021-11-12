@@ -6,7 +6,8 @@
 // Depedencies
 const http = require("http");
 const url = require("url");
-const StringDecoder = require("string_decoder").StringDecoder;
+const { StringDecoder } = require("string_decoder");
+const config = require('./config')
 
 // The server should respond to all request with a string
 
@@ -64,7 +65,7 @@ const server = http.createServer(function (request, response) {
       const payloadString = JSON.stringify(_payload);
 
       // Return the response
-      response.setHeader('Content-Type', 'application/json')
+      response.setHeader("Content-Type", "application/json");
       response.writeHead(_statusCode);
       response.end(payloadString);
 
@@ -75,8 +76,8 @@ const server = http.createServer(function (request, response) {
 });
 
 // Start the server, and have it listen on port 3000
-server.listen("3000", () => {
-  console.log("the server is listening on port 3000 now.");
+server.listen(config.port, () => {
+  console.log(`the server is listening on port ${config.port} in ${config.envName} mode.`);
 });
 
 // Define the handlers
