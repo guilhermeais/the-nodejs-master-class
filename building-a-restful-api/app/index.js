@@ -16,7 +16,7 @@ const server = http.createServer(function (request, response) {
 
   // Get the path
   const path = parsedUrl.pathname;
-  const trimmedPath = path.trim();
+  const trimmedPath = path.replace(/^\/+|\/+$/g, "");
 
   // Get the query string as an object
   const queryStringObject = parsedUrl.query;
@@ -37,11 +37,39 @@ const server = http.createServer(function (request, response) {
   request.on("end", function () {
     buffer += decoder.end();
 
-    // Send the response
-    response.end("Hello World\n");
+    // Choose the handler this request should go to. If one is not found, use the not found handler
+    const cosenHandler =
+      typeof router[trimmedPath] !== "undefined"
+        ? router[trimmedPath]
+        : handlers.notFound;
 
-    // Log the request path
-    console.log("Request received with this payload: ", buffer);
+    // Construct the data object to send to the handler
+    const data = {
+      trimmedPath,
+      queryStringObject,
+      method,
+      headers,
+      payload: buffer,
+    };
+
+    // Route the request to the hadler specified in the router
+    cosenHandler(data, function (statusCode, payload) {
+      // Use the status code called back by the handler, or default to 200
+      let _statusCode = typeof statusCode == "number" ? statusCode : 200;
+
+      // Use the payload called back by the handler, or default to empty object
+      let _payload = typeof payload == "object" ? payload : {};
+
+      // Convert the payload to a string
+      const payloadString = JSON.stringify(_payload);
+
+      // Return the response
+      response.writeHead(_statusCode);
+      response.end(payloadString);
+
+      // Log the request path
+      console.log("Request this response: ", statusCode, payloadString);
+    });
   });
 });
 
@@ -49,3 +77,22 @@ const server = http.createServer(function (request, response) {
 server.listen("3000", () => {
   console.log("the server is listening on port 3000 now.");
 });
+
+// Define the handlers
+const handlers = {};
+
+// Sample handler
+handlers.sample = function (data, callback) {
+  // Callback a http status code, and a payload object
+  callback(406, { name: "sample handler" });
+};
+
+// Not found handler
+handlers.notFound = function (data, callback) {
+  callback(404, "not found");
+};
+
+// Define a request router
+const router = {
+  sample: handlers.sample,
+};
