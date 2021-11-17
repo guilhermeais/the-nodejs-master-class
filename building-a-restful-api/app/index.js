@@ -8,13 +8,10 @@ const http = require("http");
 const https = require("https");
 const url = require("url");
 const { StringDecoder } = require("string_decoder");
-const config = require("./config");
+const config = require("./lib/config");
 const fs = require("fs");
-const _data = require('./lib/data')
-
-// TESTING
-// @TODO delete this
-_data.delete('test', 'newFile', (err)=>console.log('this was the error: ',err))
+const handlers = require('./lib/handlers');
+const helpers = require("./lib/helpers");
 
 // All the server logic for both the http and https server
 const unifiedServer = function (request, response) {
@@ -56,7 +53,7 @@ const unifiedServer = function (request, response) {
       queryStringObject,
       method,
       headers,
-      payload: buffer,
+      payload: helpers.parseJsonToObject(buffer),
     };
 
     // Route the request to the hadler specified in the router
@@ -81,22 +78,12 @@ const unifiedServer = function (request, response) {
   });
 };
 
-// Define the handlers
-const handlers = {};
 
-// Ping handler
-handlers.ping = function (data, callback) {
-  callback(200);
-}
-
-// Not found handler
-handlers.notFound = function (data, callback) {
-  callback(404, "not found");
-};
 
 // Define a request router
 const router = {
-  ping: handlers.ping
+  ping: handlers.ping,
+  users: handlers.users
 };
 
 
