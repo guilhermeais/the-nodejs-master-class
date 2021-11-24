@@ -17,8 +17,14 @@ lib.baseDir = path.join(__dirname, "/../.data/");
 
 // Write data to a file
 lib.create = function (dir, file, data, callback) {
+  const COLLECTION = `${lib.baseDir}/${dir}`
+  
+  if (!fs.existsSync(COLLECTION)) {
+    fs.mkdirSync(COLLECTION, {recursive: true});
+  }
+  
   // Open the file for writing
-  fs.open(`${lib.baseDir}/${dir}/${file}.json`, "wx", (err, fileDescriptor) => {
+  fs.open(`${COLLECTION}/${file}.json`, "wx", (err, fileDescriptor) => {
     if (!err && fileDescriptor) {
       // Convert data to string
       const stringData = JSON.stringify(data);

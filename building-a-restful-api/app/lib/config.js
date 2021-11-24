@@ -15,6 +15,7 @@ enviroments.staging = {
   httpsPort: 3001,
   envName: "staging",
   hashingSecret: "thisIsASecret",
+  maxChecks: 5,
 };
 
 // Production enviroment
@@ -23,6 +24,7 @@ enviroments.production = {
   httpsPort: 5001,
   envName: "production",
   hashingSecret: "thisIsAlsoASecret",
+  maxChecks: 5,
 };
 
 // Determine which environment was passed as comamand-line argument

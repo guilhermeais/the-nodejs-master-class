@@ -3,6 +3,7 @@
  */
 
 // Dependencies
+const config = require("./config");
 const _data = require("./data");
 const helpers = require("./helpers");
 
@@ -433,6 +434,183 @@ handlers._tokens.verifyToken = function (id, phone, callback) {
       callback(false);
     }
   });
+};
+
+// Checks
+handlers.checks = function (data, callback) {
+  const accetableMethods = ["post", "get", "put", "delete"];
+  if (accetableMethods.includes(data.method)) {
+    handlers._checks[data.method](data, callback);
+  } else {
+    callback(405);
+  }
+};
+
+// Container for all the checks methods
+handlers._checks = {};
+
+// Checks - post
+// Required data: protocol, url, method, successCodes,timeoutSeconds
+// Optional data: none
+handlers._checks.post = function (data, callback) {
+  const errors = [];
+  // Validate inputs
+  const { protocol, url, method, successCodes, timeoutSeconds } = data.payload;
+
+  const ALLOWED_PROTOCOLS = ["https", "http"];
+  const ALLOWED_METHODS = ["post", "get", "put", "delete"];
+
+  if (
+    typeof protocol === "string" &&
+    !ALLOWED_PROTOCOLS.includes(protocol.toLowerCase())
+  ) {
+    errors.push(
+      `The protocol ${protocol} is not allowed. Allowed protocols: [${ALLOWED_PROTOCOLS.join(
+        ", "
+      )}]`
+    );
+  }
+
+  if (!url) {
+    errors.push("invalid URL");
+  }
+
+  if (
+    typeof method === "string" &&
+    !ALLOWED_METHODS.includes(method.toLowerCase())
+  ) {
+    errors.push(
+      `The method ${method} is not allowed. Allowed methods: [${ALLOWED_METHODS.join(
+        ", "
+      )}]`
+    );
+  }
+
+  if (!Array.isArray(successCodes) || successCodes.length <= 0) {
+    errors.push(`Invalid success codes.`);
+  }
+
+  if (typeof timeoutSeconds != "number") {
+    errors.push(`Timeout seconds should be a number.`);
+  }
+  if (!(timeoutSeconds >= 1 && timeoutSeconds <= 5)) {
+    errors.push(`Timeout seconds should be between 1 to 5.`);
+  }
+  if (timeoutSeconds % 1 !== 0) {
+    errors.push(`Timeout seconds should be a whole number.`);
+  }
+
+  if (errors.length > 0) {
+    callback(404, { Error: errors });
+  } else {
+    // Get the token from the headers
+    const { token } = data.headers;
+    // Lookup the user by reading the token
+    if (token) {
+      _data.read("tokens", token, (err, tokenData) => {
+        if (!err && tokenData) {
+          const userPhone = tokenData.phone;
+          // Lookup the user data
+          _data.read("users", userPhone, (err, userData) => {
+            if (!err && userData) {
+              const userChecks = userData.checks || [];
+              // Verify that the user has less than the number of max-checks-per-user
+              if (userChecks.length < config.maxChecks) {
+                // Create a random id for the check
+                const checkId = helpers.createRandomString(20);
+
+                // Create the check object, and include the user's phone
+                const checkObject = {
+                  id: checkId,
+                  userPhone,
+                  protocol,
+                  url,
+                  method,
+                  successCodes,
+                  timeoutSeconds,
+                };
+
+                // Save the object
+                _data.create("checks", checkId, checkObject, (err) => {
+                  if (!err) {
+                    // Add the check id to the user's object
+                    userData.checks = userChecks;
+                    userData.checks.push(checkId);
+
+                    // Save the new user data
+                    _data.update("users", userPhone, userData, (err) => {
+                      if (!err) {
+                        // Return the data about the new check
+                        callback(201, checkObject);
+                      } else {
+                        callback(500, {
+                          Error: "Could not update the user with the new check",
+                        });
+                      }
+                    });
+                  } else {
+                    callback(500, { Error: "Could not create the new check" });
+                  }
+                });
+              } else {
+                callback(400, {
+                  Error: `The user already has the maximum number of checks. (maximum checks: ${config.maxChecks})`,
+                });
+              }
+            } else {
+              callback(403, { Error: "User not allowed, verify your token." });
+            }
+          });
+        } else {
+          callback(403, { Error: "User not allowed, verify your token." });
+        }
+      });
+    } else {
+      callback(403, { Error: "Token isn't provided." });
+    }
+  }
+};
+
+// Checks - get
+// Required data: id
+// Optional data: none
+handlers._checks.get = function (data, callback) {
+  // Check that the phone number is valid
+  const { id } = data.queryStringObject;
+
+  if (id) {
+    // Lookup the check
+    _data.read("checks", id, (err, checkData) => {
+      if (!err && checkData) {
+        // Get the token from the headers
+        const { token } = data.headers;
+
+        if (token) {
+          // Verify that the given token is valid and belongs to the user who created the check
+          handlers._tokens.verifyToken(
+            token,
+            checkData.userPhone,
+            (tokenIsValid) => {
+              if (tokenIsValid) {
+                // Return the check data
+                callback(200, checkData);
+              } else {
+                callback(403, {
+                  Error: "User not allowed, verify your token.",
+                });
+              }
+            }
+          );
+        } else {
+          callback(403, { Error: "Missing token" });
+        }
+      } else {
+        callback(404);
+      }
+    });
+  } else {
+    callback(400, { Error: "Missing the id." });
+  }
 };
 
 // Ping handler
