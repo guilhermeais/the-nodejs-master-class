@@ -16,6 +16,11 @@ enviroments.staging = {
   envName: "staging",
   hashingSecret: "thisIsASecret",
   maxChecks: 5,
+  twilio: {
+    accountSid: "AC48a5a360f72fb848d2660a78010df699",
+    authToken: "8f84d4c428d0725582b96894e7d3d3a5",
+    fromPhone: "+12058589504",
+  },
 };
 
 // Production enviroment
@@ -25,6 +30,11 @@ enviroments.production = {
   envName: "production",
   hashingSecret: "thisIsAlsoASecret",
   maxChecks: 5,
+  twilio: {
+    accountSid: "AC48a5a360f72fb848d2660a78010df699",
+    authToken: "8f84d4c428d0725582b96894e7d3d3a5",
+    fromPhone: "+5516993299116",
+  },
 };
 
 // Determine which environment was passed as comamand-line argument
