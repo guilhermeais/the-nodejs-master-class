@@ -13,14 +13,6 @@ const fs = require("fs");
 const handlers = require("./lib/handlers");
 const helpers = require("./lib/helpers");
 
-// @TODO GET RID OF THIS
-helpers.sendTwilioSMS(
-  "16993942785",
-  "55",
-  "Faala irmão, beleza? To só testando um software aqui que to fazendo blz?",(err)=>{
-    console.log('this was the error', err);
-  }
-);
 
 // All the server logic for both the http and https server
 const unifiedServer = function (request, response) {
