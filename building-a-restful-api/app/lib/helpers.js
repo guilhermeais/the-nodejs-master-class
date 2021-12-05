@@ -79,7 +79,7 @@ helpers.sendTwilioSMS = function (phone, coutryNumber = "55", msg, callback) {
 
   if (messages.length === 0) {
     // Configure the request payload
-    const TO_PHONE = `+${coutryNumber}${phone}` 
+    const TO_PHONE = `+${coutryNumber}${phone}`;
     console.log(TO_PHONE);
     const payload = {
       From: config.twilio.fromPhone,
@@ -106,17 +106,13 @@ helpers.sendTwilioSMS = function (phone, coutryNumber = "55", msg, callback) {
     // Instantiate the request object
     const req = https.request(requestDetails, (res) => {
       // Grab the status of the sent request
-   
+
       const status = res.statusCode;
       // Callback successfully if the requet went through
       if (status == 200 || status == 201) {
         callback(null);
       } else {
-     
-
-        res.on("data", chunk=> callback(JSON.parse(chunk.toString())))
-      
-        
+        res.on("data", (chunk) => callback(JSON.parse(chunk.toString())));
       }
     });
 
@@ -134,6 +130,41 @@ helpers.sendTwilioSMS = function (phone, coutryNumber = "55", msg, callback) {
     callback(404, {
       Error: `Given parameters were missing or invalid. ${messages.join(", ")}`,
     });
+  }
+};
+
+// Helper's validator
+helpers.validators = {};
+
+// returns if a given data is an object
+helpers.validators.isObject = (data) => {
+  if (data && typeof data == "object") return true;
+  else {
+    return false;
+  }
+};
+
+// returns if a given data is an array
+helpers.validators.isArray = (data) => {
+  if ( Array.isArray(data)&& data.length > 0) return true;
+  else {
+    return false;
+  }
+};
+
+// returns if a given data is tring
+helpers.validators.isString = (data, minLength = 0, hasToInclude = []) => {
+  if (
+    data &&
+    typeof data == "string" &&
+    data.length >= minLength &&
+    hasToInclude.length <= 0
+      ? true
+      : hasToInclude.includes(data)
+  )
+    return true;
+  else {
+    return false;
   }
 };
 

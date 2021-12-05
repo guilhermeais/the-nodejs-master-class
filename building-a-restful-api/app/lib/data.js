@@ -17,12 +17,12 @@ lib.baseDir = path.join(__dirname, "/../.data/");
 
 // Write data to a file
 lib.create = function (dir, file, data, callback) {
-  const COLLECTION = `${lib.baseDir}/${dir}`
-  
+  const COLLECTION = `${lib.baseDir}/${dir}`;
+
   if (!fs.existsSync(COLLECTION)) {
-    fs.mkdirSync(COLLECTION, {recursive: true});
+    fs.mkdirSync(COLLECTION, { recursive: true });
   }
-  
+
   // Open the file for writing
   fs.open(`${COLLECTION}/${file}.json`, "wx", (err, fileDescriptor) => {
     if (!err && fileDescriptor) {
@@ -108,6 +108,20 @@ lib.delete = function (dir, file, callback) {
       callback(null);
     } else {
       callback("Error deleting file");
+    }
+  });
+};
+
+// List all the items in a directory
+lib.list = function (dir, callback) {
+  fs.readdir(`${lib.baseDir}/${dir}/`, (err, data) => {
+    if (!err && data && Array.isArray(data)) {
+ 
+
+      const trimmedFileNames = data?data.map((fileName) => fileName.replace(".json", "")):[];
+      callback(null, trimmedFileNames)
+    } else {
+      callback(err, data);
     }
   });
 };
