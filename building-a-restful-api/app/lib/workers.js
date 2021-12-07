@@ -13,6 +13,8 @@ const http = require("http"); // For http checks
 const helpers = require("./helpers");
 const url = require("url");
 const _logs = require("./logs");
+const {debuglog} = require('util')
+const debug = debuglog('workers')
 
 const data = new Date();
 const dateNow = `${
@@ -33,7 +35,7 @@ workers.validateCheckData = function (originalCheckData) {
 
   if (helpers.validators.isObject(originalCheckData)) {
     if (!helpers.validators.isString(originalCheckData.id, 20)) {
-      console.log(originalCheckData.id.length);
+      debug(originalCheckData.id.length);
       messages.push("Check's id length has to be at least 20 ");
     }
 
@@ -102,7 +104,7 @@ workers.validateCheckData = function (originalCheckData) {
   if (messages.length === 0) {
     workers.performCheck(originalCheckData);
   } else {
-    console.log(`Errors: ${messages.join(", ")}`);
+    debug(`Errors: ${messages.join(", ")}`);
   }
 };
 
@@ -209,10 +211,10 @@ workers.processCheckOutcome = function (originalCheckData, checkOutcome) {
       if (alertWarranted) {
         workers.alertUserToStatusChange(newCheckData);
       } else {
-        console.log("Check outcome has not changed, no alert needed");
+        debug("Check outcome has not changed, no alert needed");
       }
     } else {
-      console.log("Error trying to sabe updates to one of the checks");
+      debug("Error trying to sabe updates to one of the checks");
     }
   });
 };
@@ -224,12 +226,12 @@ workers.alertUserToStatusChange = function (newCheckData) {
   }://${newCheckData.url} is currently ${newCheckData.state} `;
   helpers.sendTwilioSMS(newCheckData.userPhone, "55", msg, (err) => {
     if (!err) {
-      console.log(
+      debug(
         "Success: User was alerted to a status change in their check, via sms: ",
         msg
       );
     } else {
-      console.log(
+      debug(
         "Error: Could not send sms alert to user who had a state change in their check"
       );
     }
@@ -248,12 +250,12 @@ workers.gatherAllChecks = function () {
             // Pass it to the check validator, and let that that funciton continue or log errors as needed
             workers.validateCheckData(originalCheckData);
           } else {
-            console.log(`Error: Could not read check ${check} data`, dateNow);
+            debug(`Error: Could not read check ${check} data`, dateNow);
           }
         });
       });
     } else {
-      console.log("Error: Could not find any checks to process", dateNow);
+      debug("Error: Could not find any checks to process", dateNow);
     }
   });
 };
@@ -291,9 +293,9 @@ workers.log = function (
   // Append the log string to the file
   _logs.append(logFileName, logString, (err) => {
     if (!err) {
-      console.log("Logging to file succeded");
+      debug("Logging to file succeded");
     } else {
-      console.log("Logging to file failed");
+      debug("Logging to file failed");
     }
   });
 };
@@ -312,19 +314,19 @@ workers.rotateLogs = function () {
             // Truncate the log
             _logs.truncate(logId, (err)=>{
               if (!err) {
-                console.log(`Success truncating logFile - ${logId}`);
+                debug(`Success truncating logFile - ${logId}`);
                 
               }else{
-                console.log(`Error truncating logFile - ${logId}`);
+                debug(`Error truncating logFile - ${logId}`);
               }
             })
           } else {
-            console.log(`Error compressing one of the log files (file ${logId})`);
+            debug(`Error compressing one of the log files (file ${logId})`);
           }
         })
       })
     } else {
-      console.log('Error: could not find any logs to rotate');
+      debug('Error: could not find any logs to rotate');
     }
   })
 }
@@ -339,6 +341,10 @@ workers.logRotationLoop = function () {
 
 // Init script
 workers.init = function () {
+
+  // Send to console, in yellou
+  console.log('\x1b[33m%s\x1b[0m', 'Background workers are running')
+
   // Execute all the checks immediately
   workers.gatherAllChecks();
 

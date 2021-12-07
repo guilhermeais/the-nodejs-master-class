@@ -13,9 +13,17 @@ const fs = require("fs");
 const handlers = require("./handlers");
 const helpers = require("./helpers");
 const path = require("path");
+const {debuglog} = require('util')
+const debug = debuglog('server')
 
 // Instantiate the server module object
 const server = {};
+
+// Global variables
+const _colors  = {
+  'green':"\x1b[32m%s\x1b[0m",
+  "red":"\x1b[31m%s\x1b[0m"
+}
 
 // All the server logic for both the http and https server
 server.unifiedServer = function (request, response) {
@@ -77,7 +85,12 @@ server.unifiedServer = function (request, response) {
       response.end(payloadString);
 
       // Log the request path
-      console.log("Request this response: ", statusCode, payloadString);
+      // if the response is 200/201, print green otherwise print red
+     
+      const _color =  [200, 201].includes(statusCode)?_colors['green']:_colors['red']
+      
+      debug(_color,`${method.toUpperCase()}/${trimmedPath} ${statusCode}`);
+      // debug("Returning this response: ", statusCode, payloadString);
     });
   });
 };
@@ -115,6 +128,7 @@ server.init = function () {
   // Start the HTTP server
   server.httpServer.listen(config.httpPort, () => {
     console.log(
+      "\x1b[36m%s\x1b[0m",
       `the server HTTP is listening on port ${config.httpPort} in ${config.envName} mode.`
     );
   });
@@ -122,6 +136,7 @@ server.init = function () {
   // Start the HTTPS server
   server.httpsServer.listen(config.httpsPort, () => {
     console.log(
+      "\x1b[35m%s\x1b[0m",
       `the server HTTPS is listening on port ${config.httpsPort} in ${config.envName} mode.`
     );
   });
