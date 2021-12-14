@@ -22,5 +22,14 @@ app.init = function () {
 // Execute 
 app.init()
 
+// const EVENTS = ['SIGTERM', 'SIGINT','SIGQUIT']
+
+// for (const EVENT of EVENTS) {
+//   process.on(EVENT, ()=>{
+//     console.log(`${EVENT} is called`);
+//   })
+// }
+
+
 // Export the app
 module.exports = app

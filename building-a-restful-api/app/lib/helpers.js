@@ -7,6 +7,8 @@ const crypto = require("crypto");
 const config = require("./config");
 const queryString = require("querystring");
 const https = require("https");
+const path = require("path");
+const fs = require("fs");
 
 // Container for all the helpers
 const helpers = {};
@@ -146,7 +148,7 @@ helpers.validators.isObject = (data) => {
 
 // returns if a given data is an array
 helpers.validators.isArray = (data) => {
-  if ( Array.isArray(data)&& data.length > 0) return true;
+  if (Array.isArray(data) && data.length > 0) return true;
   else {
     return false;
   }
@@ -165,6 +167,29 @@ helpers.validators.isString = (data, minLength = 0, hasToInclude = []) => {
     return true;
   else {
     return false;
+  }
+};
+
+// Get the string content of a tempalte
+helpers.getTemplate = function (
+  templateName,
+  callback = (err, res) => {
+    err;
+    res;
+  }
+) {
+  if (templateName) {
+    const templatesDir = path.join(__dirname, "/../templates");
+    const templateFile = `${templatesDir}/${templateName}.html`;
+    fs.readFile(templateFile, "utf8", (err, str) => {
+      if (!err && str && str.length > 0) {
+        callback(null, str);
+      } else {
+        callback("No template could be found");
+      }
+    });
+  } else {
+    callback("A valid template name was not specified");
   }
 };
 

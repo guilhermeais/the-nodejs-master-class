@@ -13,17 +13,17 @@ const fs = require("fs");
 const handlers = require("./handlers");
 const helpers = require("./helpers");
 const path = require("path");
-const {debuglog} = require('util')
-const debug = debuglog('server')
+const { debuglog } = require("util");
+const debug = debuglog("server");
 
 // Instantiate the server module object
 const server = {};
 
 // Global variables
-const _colors  = {
-  'green':"\x1b[32m%s\x1b[0m",
-  "red":"\x1b[31m%s\x1b[0m"
-}
+const _colors = {
+  green: "\x1b[32m%s\x1b[0m",
+  red: "\x1b[31m%s\x1b[0m",
+};
 
 // All the server logic for both the http and https server
 server.unifiedServer = function (request, response) {
@@ -69,38 +69,57 @@ server.unifiedServer = function (request, response) {
     };
 
     // Route the request to the hadler specified in the router
-    cosenHandler(data, function (statusCode, payload) {
-      // Use the status code called back by the handler, or default to 200
-      let _statusCode = typeof statusCode == "number" ? statusCode : 200;
+    cosenHandler(
+      data,
+      function (statusCode = 200, payload = {}, contentType = "json") {
+        // Return the response-parts that are content-specific
+        let payloadString = "";
+        if (contentType === "json") {
+          response.setHeader("Content-Type", "application/json");
+          // Use the payload called back by the handler, or default to empty object
 
-      // Use the payload called back by the handler, or default to empty object
-      let _payload = typeof payload == "object" ? payload : {};
+          // Convert the payload to a string
+          payloadString = JSON.stringify(payload);
+        }
 
-      // Convert the payload to a string
-      const payloadString = JSON.stringify(_payload);
+        if (contentType === "html") {
+          response.setHeader("Content-Type", "text/html");
+          payloadString = typeof payload === "string" ? payload : "";
+        }
 
-      // Return the response
-      response.setHeader("Content-Type", "application/json");
-      response.writeHead(_statusCode);
-      response.end(payloadString);
+        // Return the response-parts that are common to all content-types
+        response.writeHead(statusCode);
+        response.end(payloadString);
+        // Log the request path
+        // if the response is 200/201, print green otherwise print red
 
-      // Log the request path
-      // if the response is 200/201, print green otherwise print red
-     
-      const _color =  [200, 201].includes(statusCode)?_colors['green']:_colors['red']
-      
-      debug(_color,`${method.toUpperCase()}/${trimmedPath} ${statusCode}`);
-      // debug("Returning this response: ", statusCode, payloadString);
-    });
+        const _color = [200, 201].includes(statusCode)
+          ? _colors["green"]
+          : _colors["red"];
+
+        debug(_color, `${method.toUpperCase()}/${trimmedPath} ${statusCode}`);
+        // debug("Returning this response: ", statusCode, payloadString);
+      }
+    );
   });
 };
 
 // Define a request router
 server.router = {
+  "": handlers.index,
+  "account/create": handlers.accountCreate,
+  "account/edit": handlers.accountEdit,
+  "account/deleted": handlers.accountDeleted,
+  "session/create": handlers.sessionCreate,
+  "session/deleted": handlers.sessionDeleted,
+  "checks/all": handlers.checkList,
+  "checks/create": handlers.checksCreate,
+  "checks/edit": handlers.checksEdit,
+
   ping: handlers.ping,
-  users: handlers.users,
-  tokens: handlers.tokens,
-  checks: handlers.checks,
+  "api/users": handlers.users,
+  "api/tokens": handlers.tokens,
+  "api/checks": handlers.checks,
 };
 
 // Instantiate the HTTP server

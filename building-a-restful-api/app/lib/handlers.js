@@ -9,6 +9,39 @@ const helpers = require("./helpers");
 
 // Define the handlers
 const handlers = {};
+/**
+ * HTML Handlers
+ * @param {{method: Function}} data
+ * @param {Function} callback
+ */
+
+// Index handler
+handlers.index = function (data, callback = () => {}) {
+  // Reject any request that isn't a GET
+  if (data.method === "get") {
+    // Read in a template as a string
+    helpers.getTemplate("index", (err, str) => {
+      if (!err && str) {
+        callback(200, str, "html");
+      } else {
+        callback(500, undefined, "html");
+      }
+    });
+  } else {
+    // Return that the method isn't allowed
+    callback(405, undefined, "html");
+  }
+};
+
+/**
+ * JSON API Handlers
+ */
+
+/**
+ *
+ * @param {{method: Function}} data
+ * @param {Function} callback
+ */
 
 // Users
 handlers.users = function (data, callback) {
@@ -224,8 +257,8 @@ handlers._users.delete = function (data, callback) {
       : "";
 
   if (phone) {
-    const {token} = data.headers
-    if(!token)return callback(403, {Error: 'missing token'});
+    const { token } = data.headers;
+    if (!token) return callback(403, { Error: "missing token" });
     handlers._tokens.verifyToken(token, phone, (tokenIsValid) => {
       if (tokenIsValid) {
         // Lookup the user
@@ -233,25 +266,24 @@ handlers._users.delete = function (data, callback) {
           if (!err && data) {
             _data.delete("users", phone, (err) => {
               if (!err) {
-                const messages = []
-                messages.push('User was deleted.')
+                const messages = [];
+                messages.push("User was deleted.");
                 // Delete each of the checks associated with the user
                 if (Array.isArray(data.checks) && data.checks.length > 0) {
                   // Loop through the checks
-                  data.checks.forEach(checkId=>{
-                    _data.delete('checks', checkId, (err)=>{
+                  data.checks.forEach((checkId) => {
+                    _data.delete("checks", checkId, (err) => {
                       if (!err) {
-                        messages.push(`Check ${checkId} was deleted`)
+                        messages.push(`Check ${checkId} was deleted`);
                       } else {
-                        messages.push(`Error on delete the check ${checkId}`)
+                        messages.push(`Error on delete the check ${checkId}`);
                       }
-                      callback(200, messages)
-                    })
-                  })
-              
-                }else{
-                  messages.push('User has no checks to delete')
-                  callback(200, messages)
+                      callback(200, messages);
+                    });
+                  });
+                } else {
+                  messages.push("User has no checks to delete");
+                  callback(200, messages);
                 }
               } else {
                 callback(500, { Error: "Could not delete the specified user" });
@@ -760,17 +792,25 @@ handlers._checks.delete = function (data, callback) {
                             );
                             //console.log('check index', checkIndex);
                             if (checkIndex > -1) {
-                              userData.checks.splice(checkIndex,1);
+                              userData.checks.splice(checkIndex, 1);
                             }
                           }
 
-                          _data.update("users", checkData.userPhone, userData, (err)=>{
-                            if (!err) {
-                              callback(200)
-                            } else {
-                             callback(500, {Error: 'Could not remove the check from the user object.'}) 
+                          _data.update(
+                            "users",
+                            checkData.userPhone,
+                            userData,
+                            (err) => {
+                              if (!err) {
+                                callback(200);
+                              } else {
+                                callback(500, {
+                                  Error:
+                                    "Could not remove the check from the user object.",
+                                });
+                              }
                             }
-                          });
+                          );
                         } else {
                           callback(404, {
                             Error:
