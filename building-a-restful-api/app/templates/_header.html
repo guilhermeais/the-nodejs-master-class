@@ -2,18 +2,53 @@
 <html lang="pt-br">
 
 <head>
+  <!-- General Settings -->
   <meta charset="UTF-8">
+  <base href="{global.baseUrl}">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+
+  <!-- Meta Tags -->
+  <title>{head.title} | {global.appName}</title>
+  <meta name="description" content="{head.description}">
+
+  <!-- Status Assets -->
+  <link type="image/x-icon" ref="icon" href="favicon.ico">
+  <script type="text/javascript" charset="utf-8" src="public/app.js" module></script>
+  <link rel="stylesheet" type="text/css" href="public/app.css" />
 </head>
 
-<body>
+<body class="{body.class}">
   <!-- Page Wrapper -->
   <div class="wrapper">
 
-  <!-- Header -->
-  <header class="header"></header>
+    <!-- Header -->
+    <header class="header">
+      <!-- Logo -->
+      <a class="logo" href="/"></a>
 
-  <!-- Page-specific Contet -->
-  <div class="content">
+      <!-- Navigation -->
+      <ul class="menu">
+        <li>
+          <a href="/">Home</a>
+        </li>
+        <li>
+          <a href="#" class="loggedOut">Singup</a>
+        </li>
+        <li>
+          <a href="#" class="loggedOut">Login</a>
+        </li>
+        <li>
+          <a href="#" class="loggedIn">Dashboard</a>
+        </li>
+        <li>
+          <a href="#" class="loggedIn">Account Settings</a>
+        </li>
+        <li>
+          <a href="#" class="loggedIn">Logout</a>
+        </li>
+      </ul>
+    </header>
+
+    <!-- Page-specific Contet -->
+    <div class="content">

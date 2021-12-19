@@ -106,6 +106,7 @@ server.unifiedServer = function (request, response) {
 
 // Define a request router
 server.router = {
+
   "": handlers.index,
   "account/create": handlers.accountCreate,
   "account/edit": handlers.accountEdit,
