@@ -24,6 +24,19 @@ const _colors = {
   green: "\x1b[32m%s\x1b[0m",
   red: "\x1b[31m%s\x1b[0m",
 };
+const _parseString = (value) => (typeof value === "string" ? value : "");
+const POSSIBLES_CONTENT_TYPES = {
+  json: { type: "application/json", parse: (value) => JSON.stringify(value) },
+  html: { type: "text/html", parse: _parseString },
+  css: { type: "text/css", parse:  (value)=>value&&typeof value !=='undefined'?value:null  },
+  png: { type: "image/png", parse: (value)=>value&&typeof value !=='undefined'?value:null },
+  jpeg: { type: "image/jpeg", parse: (value)=>value&&typeof value !=='undefined'?value:null },
+  jpg: { type: "image/jpeg", parse: (value)=>value&&typeof value !=='undefined'?value:null },
+  favicon: { type: "image/x-icon", parse: (value)=>value&&typeof value !=='undefined'?value:null },
+  plain: { type: "text/plain",  parse:(value)=>value&&typeof value !=='undefined'?value:null },
+  js: { type: "application/javascript",  parse:(value)=>value&&typeof value !=='undefined'?value:null},
+  _default: { type: "text/plain", parse:(value)=>value&&typeof value !=='undefined'?value:null },
+};
 
 // All the server logic for both the http and https server
 server.unifiedServer = function (request, response) {
@@ -54,10 +67,13 @@ server.unifiedServer = function (request, response) {
     buffer += decoder.end();
 
     // Choose the handler this request should go to. If one is not found, use the not found handler
-    const cosenHandler =
+    let cosenHandler =
       typeof server.router[trimmedPath] !== "undefined"
         ? server.router[trimmedPath]
         : handlers.notFound;
+
+        // If ther equest is within the public directory, use the public handler instead
+        cosenHandler = trimmedPath.indexOf('public') > -1?handlers.public : cosenHandler
 
     // Construct the data object to send to the handler
     const data = {
@@ -73,20 +89,13 @@ server.unifiedServer = function (request, response) {
       data,
       function (statusCode = 200, payload = {}, contentType = "json") {
         // Return the response-parts that are content-specific
-        let payloadString = "";
-        if (contentType === "json") {
-          response.setHeader("Content-Type", "application/json");
-          // Use the payload called back by the handler, or default to empty object
+        response.setHeader(
+          "Content-Type",
+          POSSIBLES_CONTENT_TYPES[contentType?contentType:'_default'].type
+        );
 
-          // Convert the payload to a string
-          payloadString = JSON.stringify(payload);
-        }
-
-        if (contentType === "html") {
-          response.setHeader("Content-Type", "text/html");
-          payloadString = typeof payload === "string" ? payload : "";
-        }
-
+        let payloadString = POSSIBLES_CONTENT_TYPES[contentType?contentType:'_default'].parse(payload);
+         // console.log('payload string', payloadString);
         // Return the response-parts that are common to all content-types
         response.writeHead(statusCode);
         response.end(payloadString);
@@ -106,7 +115,6 @@ server.unifiedServer = function (request, response) {
 
 // Define a request router
 server.router = {
-
   "": handlers.index,
   "account/create": handlers.accountCreate,
   "account/edit": handlers.accountEdit,
@@ -121,6 +129,8 @@ server.router = {
   "api/users": handlers.users,
   "api/tokens": handlers.tokens,
   "api/checks": handlers.checks,
+  "favicon.ico": handlers.favicon,
+  'public': handlers.public,
 };
 
 // Instantiate the HTTP server

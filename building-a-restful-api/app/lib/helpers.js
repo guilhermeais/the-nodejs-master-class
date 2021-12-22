@@ -178,21 +178,18 @@ helpers.getTemplate = function (
     if (!err && res) {
       res;
     }
-
   }
 ) {
   data = typeof data === "object" && data ? data : {};
 
   if (templateName) {
- 
     const templatesDir = path.join(__dirname, "/../templates");
     const templateFile = `${templatesDir}/${templateName}.html`;
     fs.readFile(templateFile, "utf8", (err, str) => {
-  
       if (!err && str && str.length > 0) {
         // Do the interpolation on the string
         const finalString = helpers.interpolate(str, data);
-    
+
         callback(null, finalString);
       } else {
         callback("No template could be found");
@@ -254,6 +251,23 @@ helpers.interpolate = function (str, data) {
   }
 
   return str;
+};
+
+// Get the contents of a static (public) asset
+helpers.getStaticAsset = function (filename = "", callback) {
+  if (typeof filename === "string" && filename.length > 0) {
+    const publicDir = path.join(__dirname, "/../public");
+    const filePath = `${publicDir}/${filename}`;
+    fs.readFile(filePath, (err, data) => {
+      if (!err && data) {
+        callback(null, data);
+      } else {
+        callback("No file could be found");
+      }
+    });
+  } else {
+    callback("A valid file name was not specified");
+  }
 };
 
 // Export the module

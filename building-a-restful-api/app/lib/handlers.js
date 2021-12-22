@@ -16,7 +16,10 @@ const handlers = {};
  */
 
 // Index handler
-handlers.index = function (data, callback = (statusCode=500, str='',type='html') => {}) {
+handlers.index = function (
+  data,
+  callback = (statusCode = 500, str = "", type = "html") => {}
+) {
   // Reject any request that isn't a GET
 
   if (data.method === "get") {
@@ -28,22 +31,18 @@ handlers.index = function (data, callback = (statusCode=500, str='',type='html')
       "body.class": "index",
     };
 
- 
     // Read in a template as a string
-    helpers.getTemplate("index",templateData, (err, str) => {
+    helpers.getTemplate("index", templateData, (err, str) => {
       if (!err && str) {
         // Add the universal header and footer
-        helpers.addUniversalTemplates(str, templateData, (err, fullStr)=>{
+        helpers.addUniversalTemplates(str, templateData, (err, fullStr) => {
           if (!err && fullStr) {
-        
             // Return that page as HTML
-            callback(200, fullStr,'html')
-         
-          }else{
+            callback(200, fullStr, "html");
+          } else {
             callback(500, undefined, "html");
           }
-        })
-
+        });
       } else {
         callback(500, undefined, "html");
       }
@@ -51,6 +50,64 @@ handlers.index = function (data, callback = (statusCode=500, str='',type='html')
   } else {
     // Return that the method isn't allowed
     callback(405, undefined, "html");
+  }
+};
+
+// Favicon
+handlers.favicon = function (data, callback) {
+  // Reject any request that isn't a GET
+
+  if (data.method === "get") {
+    // Read in the favicon's data
+    helpers.getStaticAsset("favicon.ico", (err, data) => {
+      if (!err && data) {
+        // Callback the data
+        callback(200, data, "favicon");
+      } else {
+        callback(500);
+      }
+    });
+  } else {
+    callback(405);
+  }
+};
+
+// Publi assets
+handlers.public = function (data, callback) {
+  // Reject any request that isn't a GET
+
+  if (data.method === "get") {
+    // Get the filename being requested
+    const trimmedAssetName = data.trimmedPath.replace("public/", "").trim();
+    if (trimmedAssetName.length > 0) {
+      // Read in the asset's data
+      helpers.getStaticAsset(trimmedAssetName, (err, data) => {
+        if (!err && data) {
+          // Determine the content type (default to plain text)
+
+          const POSSIBLES_CONTENT_TYPES = ["css", "png", "jpeg", "jpg", "ico",'js'];
+
+          let contentType = POSSIBLES_CONTENT_TYPES.find(
+            (type) => trimmedAssetName.indexOf(`.${type}`) > -1
+          );
+          contentType = contentType
+            ? contentType === "ico"
+              ? "favicon"
+              : contentType
+            : "plain";
+          // console.log("handlers.public -> content type ->", contentType);
+
+          // Callback the data
+          callback(200, data, contentType);
+        } else {
+          callback(404);
+        }
+      });
+    } else {
+      callback(404);
+    }
+  } else {
+    callback(405);
   }
 };
 
