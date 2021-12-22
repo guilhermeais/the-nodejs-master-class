@@ -5,7 +5,7 @@ An application made in pure Node JS, without any libraries 😳
   The main goal of this project is to obvisiously improve my NodeJS abilities, but, too improve my english understanding
 </h3>
 <b/>
-in it i'm learning:
+This may sound unproductive (and is indeed), but I'm really enjoying it, because in it i'm learning:
 <ul>
   <li>
     About the built-in NodeJS modules
