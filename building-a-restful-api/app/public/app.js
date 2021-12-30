@@ -3,6 +3,12 @@
  *
  */
 
+
+//Helpers funcitions
+const isValidStatusCode = (statusCode, possibleStatusCode=[200,201]) => {
+  return Array.isArray(possibleStatusCode) && possibleStatusCode.includes(statusCode)
+}
+
 // Container for frontend application
 var app = {};
 
@@ -82,6 +88,38 @@ app.client.request = function(headers,path,method,queryStringObject,payload,call
 
 };
 
+// Bind the logout button
+app.bindLogoutButton = function(){
+  document.getElementById("logoutButton").addEventListener("click", function(e){
+
+    // Stop it from redirecting anywhere
+    e.preventDefault();
+
+    // Log the user out
+    app.logUserOut();
+
+  });
+};
+
+// Log the user out then redirect them
+app.logUserOut = function(){
+  // Get the current token id
+  var tokenId = typeof(app.config.sessionToken.id) == 'string' ? app.config.sessionToken.id : false;
+
+  // Send the current token to the tokens endpoint to delete it
+  var queryStringObject = {
+    'id' : tokenId
+  };
+  app.client.request(undefined,'api/tokens','DELETE',queryStringObject,undefined,function(statusCode,responsePayload){
+    // Set the app.config token as false
+    app.setSessionToken(false);
+
+    // Send the user to the logged out page
+    window.location = '/session/deleted';
+
+  });
+};
+
 // Bind the forms
 app.bindForms = function(){
   if(document.querySelector("form")){
@@ -108,19 +146,24 @@ app.bindForms = function(){
 
       // Call the API
       app.client.request(undefined,path,method,undefined,payload,function(statusCode,responsePayload){
-       // console.log('Result request: ', statusCode, responsePayload);
         // Display an error on the form if needed
-        if(![200,201].includes(statusCode)){
+        if(!isValidStatusCode(statusCode)){
 
-          // Try to get the error from the api, or set a default error message
-          var error = typeof(responsePayload.Error) == 'string' ? responsePayload.Error : 'An error has occured, please try again';
+          if(statusCode == 403){
+            // log the user out
+            app.logUserOut();
+            
+          } else {
 
-          // Set the formError field with the error text
-          document.querySelector("#"+formId+" .formError").innerHTML = error;
+            // Try to get the error from the api, or set a default error message
+            var error = typeof(responsePayload.Error) == 'string' ? responsePayload.Error : 'An error has occured, please try again';
 
-          // Show (unhide) the form error field on the form
-          document.querySelector("#"+formId+" .formError").style.display = 'block';
+            // Set the formError field with the error text
+            document.querySelector("#"+formId+" .formError").innerHTML = error;
 
+            // Show (unhide) the form error field on the form
+            document.querySelector("#"+formId+" .formError").style.display = 'block';
+          }
         } else {
           // If successful, send to form response processor
           app.formResponseProcessor(formId,payload,responsePayload);
@@ -144,7 +187,7 @@ app.formResponseProcessor = function(formId,requestPayload,responsePayload){
 
     app.client.request(undefined,'api/tokens','POST',undefined,newPayload,function(newStatusCode,newResponsePayload){
       // Display an error on the form if needed
-      if(![200,201].includes(newStatusCode )){
+      if(!isValidStatusCode(newStatusCode)){
 
         // Set the formError field with the error text
         document.querySelector("#"+formId+" .formError").innerHTML = 'Sorry, an error has occured. Please try again.';
@@ -197,14 +240,13 @@ app.setLoggedInClass = function(add){
 
 // Set the session token in the app.config object as well as localstorage
 app.setSessionToken = function(token){
- // console.log('token received: ', token);
   app.config.sessionToken = token;
   var tokenString = JSON.stringify(token);
   localStorage.setItem('token',tokenString);
   if(typeof(token) == 'object'){
     app.setLoggedInClass(true);
   } else {
-    app.setLoggedInClass(null);
+    app.setLoggedInClass(false);
   }
 };
 
@@ -219,12 +261,12 @@ app.renewToken = function(callback){
     };
     app.client.request(undefined,'api/tokens','PUT',undefined,payload,function(statusCode,responsePayload){
       // Display an error on the form if needed
-      if(statusCode == 200){
+      if(isValidStatusCode(statusCode)){
         // Get the new token details
         var queryStringObject = {'id' : currentToken.id};
         app.client.request(undefined,'api/tokens','GET',queryStringObject,undefined,function(statusCode,responsePayload){
           // Display an error on the form if needed
-          if(statusCode == 200){
+          if(isValidStatusCode(statusCode)){
             app.setSessionToken(responsePayload);
             callback(false);
           } else {
@@ -259,6 +301,9 @@ app.init = function(){
 
   // Bind all form submissions
   app.bindForms();
+
+  // Bind logout logout button
+  app.bindLogoutButton();
 
   // Get the token from localstorage
   app.getSessionToken();
