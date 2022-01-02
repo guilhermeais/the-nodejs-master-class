@@ -22,7 +22,7 @@ cli.responders = {
   man: () => {},
   help: () => {},
   exit: function () {
-    console.log("You asked for exit");
+   process.exit(0)
   },
   stats: function () {
     console.log("You asked for stats");
