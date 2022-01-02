@@ -4,32 +4,7 @@
  */
 
 /* Resets */
-body,
-p,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-div,
-span,
-header,
-footer,
-img,
-a,
-a:hover,
-a:active,
-a:visited,
-table,
-tr,
-td,
-th,
-form,
-input,
-button,
-select,
-textarea {
+body,p,h1,h2,h3,h4,h5,h6,div,span,header,footer,img,a,a:hover,a:active,a:visited,table,tr,td,th,form,input,button,select,textarea{
   line-height: 100%;
   padding: 0;
   margin: 0;
@@ -41,14 +16,14 @@ textarea {
   border-width: 0;
 }
 
-.clear {
+.clear{
   float: none;
   width: 100%;
   height: 1px;
 }
 
 /* Main color palette */
-.header {
+.header{
   background-color: #fff;
   border-width: 0 0 1px 0;
   border-style: solid;
@@ -62,44 +37,44 @@ textarea {
   min-width: 1200px;
 }
 
-.header ul {
+.header ul{
   list-style-type: none;
   text-align: right;
   padding: 0 75px;
   float: right;
 }
 
-.header ul li {
+.header ul li{
   display: inline-block;
   padding: 10px 10px 0 10px;
 }
 
-.header ul li a {
+.header ul li a{
   text-transform: uppercase;
   font-weight: 900 !important;
   font-size: 11px;
 }
 
-.header ul li.loggedIn {
+.header ul li.loggedIn{
   display: none;
 }
 
-body.loggedIn .header ul li.loggedIn {
+body.loggedIn .header ul li.loggedIn{
   display: inline-block;
 }
 
-body.loggedIn .header ul li.loggedOut {
+body.loggedIn .header ul li.loggedOut{
   display: none;
 }
 
-.header .logo {
+.header .logo{
   text-align: left;
   padding: 0 0 0 90px;
   float: left;
 }
 
-.header .logo img {
-  width: 50px;
+.header .logo img{
+    width: 50px;
 }
 
 .content {
@@ -108,7 +83,7 @@ body.loggedIn .header ul li.loggedOut {
   margin: 150px auto;
 }
 
-.footer {
+.footer{
   width: 100%;
   background-color: #1a1a1a;
   padding: 50px 0;
@@ -116,17 +91,15 @@ body.loggedIn .header ul li.loggedOut {
   border-width: 1px 0 0 0;
   border-color: #fff;
   border-style: solid;
-  position: absolute;
-  bottom: 0;
 }
 
-.footer .copyright {
+.footer .copyright{
   color: #fff;
   font-size: 10px;
 }
 
 /* Index */
-h1 {
+h1{
   text-align: center;
   font-size: 20px;
   text-transform: uppercase;
@@ -134,7 +107,7 @@ h1 {
   padding: 0 0 5px 0;
 }
 
-h2 {
+h2{
   text-align: center;
   font-size: 13px;
   text-transform: uppercase;
@@ -142,7 +115,7 @@ h2 {
   padding: 0 0 20px 0;
 }
 
-body.index .blurb {
+body.index .blurb{
   text-align: center;
   background-color: #ececec;
   border-color: #b3b3b3;
@@ -156,17 +129,11 @@ body.index .blurb {
   font-size: 14px;
 }
 
-.ctaWrapper {
+.ctaWrapper{
   text-align: center;
 }
 
-.cta,
-a.cta:hover,
-a.cta:active,
-a.cta:visited,
-button.cta:hover,
-button.cta:active,
-button.cta:visited {
+.cta,a.cta:hover,a.cta:active,a.cta:visited,button.cta:hover,button.cta:active,button.cta:visited{
   background-color: #1a1a1a;
   color: #fff;
   border-radius: 10px;
@@ -179,35 +146,35 @@ button.cta:visited {
   cursor: pointer;
 }
 
-.cta.blue {
+.cta.blue{
   background-color: #214478 !important;
 }
 
-.cta.green {
+.cta.green{
   background-color: #217844 !important;
 }
 
-.cta.red {
+.cta.red{
   background-color: #c83737 !important;
 }
 
-.warning {
+.warning{
   font-style: italic;
   color: #c83737;
   font-size: 17px;
   text-align: center;
   line-height: 150%;
-  padding: 0 0 20px 0;
+  padding: 0 0 20px 0 ;
 }
 
 /* Form Styling for Account Creation page and others */
-.formWrapper {
+.formWrapper{
   margin: 0 auto;
   max-width: 500px;
   padding: 15px;
 }
 
-.formError {
+.formError{
   display: none;
   background-color: #c83737;
   font-style: italic;
@@ -221,7 +188,7 @@ button.cta:visited {
   border-style: solid;
 }
 
-.formSuccess {
+.formSuccess{
   display: none;
   background-color: #217844;
   font-style: italic;
@@ -239,35 +206,33 @@ hr {
   margin: 30px 0;
 }
 
-input,
-select,
-option {
+input,select,option {
   border-width: 1px;
   border-radius: 2px;
   padding: 7px 1%;
   width: 100%;
 }
 
-.checkboxGroup input {
+.checkboxGroup input{
   display: inline-block;
   width: initial;
   margin: 20px;
 }
 
-input.disabled {
+input.disabled{
   background-color: #efefef;
 }
 
-.inputWrapper {
+.inputWrapper{
   padding: 0 0 20px 0;
 }
 
-.inputLabel {
+.inputLabel{
   padding: 0 0 5px 0;
   color: #808080;
 }
 
-.backButton {
+.backButton{
   text-transform: uppercase;
   font-weight: bold !important;
   display: inline-block !important;
@@ -280,15 +245,15 @@ input.disabled {
   cursor: pointer;
 }
 
-table {
+table{
   width: 100%;
 }
 
-tr {
+tr{
   width: 100%;
 }
 
-th {
+th{
   text-transform: uppercase;
   font-weight: bold;
   padding: 10px;
@@ -299,13 +264,11 @@ th {
   background-color: #efefef;
 }
 
-td {
+td{
   padding: 5px;
 }
 
-td a,
-td a:hover,
-td a:active {
+td a, td a:hover, td a:active{
   color: #2e5fa8;
   text-decoration: underline;
   cursor: pointer;
@@ -313,18 +276,18 @@ td a:active {
 
 /* Page specific styles for dashboard */
 
-#noChecksMessage td {
+#noChecksMessage td{
   text-align: center;
   font-style: italic;
   font-size: 20px;
   padding: 20px;
 }
 
-#noChecksMessage {
+#noChecksMessage{
   display: none;
 }
 
-#createCheckCTA {
+#createCheckCTA{
   margin-top: 40px;
   display: none;
 }
