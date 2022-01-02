@@ -9,6 +9,7 @@ const Events = require("events");
 const { colors } = require("./helpers");
 const { loadavg, cpus, freemem, uptime } = require("os");
 const { getHeapStatistics } = require("v8");
+const _data = require("./data");
 class _events extends Events {
   constructor() {
     super();
@@ -76,7 +77,29 @@ cli.responders = {
   },
 
   "list users": function () {
-    console.log("You asked for list users");
+    _data.list("users", (err, userIds) => {
+      if (!err && userIds && Array.isArray(userIds)) {
+        cli.verticalSpace();
+        userIds.forEach((id) => {
+          _data.read("users", id, (err, user) => {
+            if (!err && user && typeof user == "object") {
+              let line = `Name: ${user.firstName} ${user.lastName}; Phone: ${
+                user.phone
+              }; Checks: ${
+                user.checks &&
+                Array.isArray(user.checks) &&
+                user.checks.length > 0
+                  ? user.checks.length
+                  : 0
+              }.`;
+
+              console.log(line);
+              cli.verticalSpace()
+            }
+          });
+        });
+      }
+    });
   },
   "more user info": function (str) {
     console.log("You asked for more user info", str);
