@@ -14,11 +14,17 @@ const fs = require("fs");
 const helpers = {};
 
 // Color for the console
-helpers.colors = {
-  green: "\x1b[32m%s\x1b[0m",
-  red: "\x1b[31m%s\x1b[0m",
-  darkBlue: "\x1b[34m%s\x1b[0m"
-} 
+helpers.colors = function (str='') {
+  if (typeof str !== 'string') {
+    throw new Error('str should be a string')
+  }
+  return {
+    green: `\x1b[32m${str&&str.length>0?str:'%s'}\x1b[0m`,
+    red: `\x1b[31m${str&&str.length>0?str:'%s'}\x1b[0m`,
+    darkBlue: `\x1b[34m${str&&str.length>0?str:'%s'}\x1b[0m`,
+    yellow: `\x1b[33m${str&&str.length>0?str:'%s'}\x1b[0m`,
+  };
+};
 
 // Create a SHA256 hash
 helpers.hash = function (str) {

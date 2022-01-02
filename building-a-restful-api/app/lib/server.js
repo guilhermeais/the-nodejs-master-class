@@ -20,7 +20,7 @@ const debug = debuglog("server");
 const server = {};
 
 // Global variables
-const _colors = Object.assign(helpers.colors)
+const _colors = Object.assign(helpers.colors())
 const _parseString = (value) => (typeof value === "string" ? value : "");
 const POSSIBLES_CONTENT_TYPES = {
   json: { type: "application/json", parse: (value) => JSON.stringify(value) },

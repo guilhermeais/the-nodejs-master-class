@@ -14,6 +14,11 @@ class _events extends Events {
 }
 const e = new _events();
 
+// Helpers
+const _window = {
+  width: process.stdout.columns,
+};
+
 // Instantiate the CLI module object
 const cli = {};
 
@@ -22,7 +27,7 @@ cli.responders = {
   man: () => {},
   help: () => {},
   exit: function () {
-   process.exit(0)
+    process.exit(0);
   },
   stats: function () {
     console.log("You asked for stats");
@@ -52,14 +57,98 @@ cli.responders = {
 
 // Help / Man
 cli.responders.help = function () {
-  console.log("You asked for help");
+  const commands = {
+    man: "Show this help page",
+    help: "Alias of the 'man' command",
+    exit: "Kill the CLI (and the rest of the application)",
+    stats:
+      "Get statistics on the underlyong operating system and resource utilization",
+
+    "list users":
+      "Show a list of all the registered (undeleted) users in the system",
+    "more user info --{userId}": "how details of a specefic user",
+
+    "list checks --up --down":
+      "Show a list of all the active checks in the system, including their state. The '--up' and the '--down' are both optional",
+    "more check info --{checkId}": "Show details of a specified check",
+
+    "list logs":
+      "Show a list of all the log files available to be read (compressed and uncompressed)",
+    "more log info --{fileName}": "Show details of a specified log file",
+  };
+
+  // Show a header fo the help page that is wide as the screen
+  cli.horizontalLine();
+  cli.centered("CLI MANUAL");
+  cli.horizontalLine();
+  cli.verticalSpace(2);
+
+  // Show each command, followed by its exaplanation, in white and yrellow respectively
+  for (const key in commands) {
+  
+      const value = commands[key];
+      let line = colors(key).yellow;
+      const padding = (60 - key.length);
+      for (let i = 0; i < padding; i++) {
+        line += " ";
+      }
+     
+      line += value;
+      console.log(line);
+      cli.verticalSpace();
+    
+  }
+
+  cli.verticalSpace(1);
+
+  // End with another horizontal line
+  cli.horizontalLine();
 };
 cli.responders.man = cli.responders.help;
+
+// Create a vertical space
+cli.verticalSpace = function (lines = 1) {
+  if (typeof lines !== "number") {
+    throw new Error("Lines should be a number");
+  }
+
+  for (let i = 0; i < lines; i++) {
+    console.log("");
+  }
+};
+
+// Create a horizontal line across the screen
+cli.horizontalLine = function () {
+  let line = "";
+  for (let i = 0; i < _window.width; i++) {
+    line += "-";
+  }
+  console.log(line);
+};
+
+// Create centered text on the screen
+cli.centered = function (str = "") {
+  if (typeof str !== "string") {
+    throw new Error("str should be a string");
+  }
+
+  // Calculate the left padding there should be
+  const leftPadding = Math.floor((_window.width - str.length) / 2);
+
+  // Put in the left padded spaced before the string itself
+  let line = "";
+
+  for (let i = 0; i < leftPadding; i++) {
+    line += " ";
+  }
+  line += str;
+  console.log(line);
+};
 
 // Input handlers
 const possibleInputs = Object.keys(cli.responders);
 for (const eventKey of possibleInputs) {
-  if (possibleInputs.includes(eventKey)) {
+  if (cli.responders.hasOwnProperty(eventKey)) {
     e.on(eventKey, cli.responders[eventKey]);
   }
 }
@@ -95,7 +184,7 @@ cli.proccesInput = function (str) {
 // Init script
 cli.init = function () {
   // Send the start message to the console, in dark blue
-  console.log(colors.darkBlue, "The CLI is running");
+  console.log(colors().darkBlue, "The CLI is running");
 
   // Start the interface
   const _interface = readline.createInterface({
