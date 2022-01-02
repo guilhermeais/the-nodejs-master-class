@@ -13,6 +13,13 @@ const fs = require("fs");
 // Container for all the helpers
 const helpers = {};
 
+// Color for the console
+helpers.colors = {
+  green: "\x1b[32m%s\x1b[0m",
+  red: "\x1b[31m%s\x1b[0m",
+  darkBlue: "\x1b[34m%s\x1b[0m"
+} 
+
 // Create a SHA256 hash
 helpers.hash = function (str) {
   if (typeof str === "string" && str.length > 0) {

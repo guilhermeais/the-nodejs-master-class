@@ -20,10 +20,7 @@ const debug = debuglog("server");
 const server = {};
 
 // Global variables
-const _colors = {
-  green: "\x1b[32m%s\x1b[0m",
-  red: "\x1b[31m%s\x1b[0m",
-};
+const _colors = Object.assign(helpers.colors)
 const _parseString = (value) => (typeof value === "string" ? value : "");
 const POSSIBLES_CONTENT_TYPES = {
   json: { type: "application/json", parse: (value) => JSON.stringify(value) },

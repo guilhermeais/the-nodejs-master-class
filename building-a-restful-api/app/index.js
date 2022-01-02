@@ -4,8 +4,9 @@
  */
 
 // Dependencies
-const server = require('./lib/server');
-const workers = require('./lib/workers');
+const server = require("./lib/server");
+const workers = require("./lib/workers");
+const cli = require("./lib/cli");
 
 // Declare the app
 const app = {};
@@ -13,14 +14,17 @@ const app = {};
 // Init function
 app.init = function () {
   // Start the server
-  server.init()
+  server.init();
 
   // Start the workers
-  workers.init()
-}
+  workers.init();
 
-// Execute 
-app.init()
+  // Start the CLI, but make sure it starts last
+  setTimeout(() => cli.init(), 50);
+};
+
+// Execute
+app.init();
 
 // const EVENTS = ['SIGTERM', 'SIGINT','SIGQUIT']
 
@@ -30,6 +34,5 @@ app.init()
 //   })
 // }
 
-
 // Export the app
-module.exports = app
+module.exports = app;
