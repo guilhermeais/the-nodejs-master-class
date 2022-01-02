@@ -17,22 +17,60 @@ const e = new _events();
 // Instantiate the CLI module object
 const cli = {};
 
+// Responders object
+cli.responders = {
+  man: () => {},
+  help: () => {},
+  exit: function () {
+    console.log("You asked for exit");
+  },
+  stats: function () {
+    console.log("You asked for stats");
+  },
+
+  "list users": function () {
+    console.log("You asked for list users");
+  },
+  "more user info": function (str) {
+    console.log("You asked for more user info", str);
+  },
+
+  "list checks": function (str) {
+    console.log("You asked for list checks", str);
+  },
+  "more check info": function (str) {
+    console.log("You asked for more check info", str);
+  },
+
+  "list logs": function () {
+    console.log("You asked for list logs");
+  },
+  "more log info": function (str) {
+    console.log("You asked for more log info", str);
+  },
+};
+
+// Help / Man
+cli.responders.help = function () {
+  console.log("You asked for help");
+};
+cli.responders.man = cli.responders.help;
+
+// Input handlers
+const possibleInputs = Object.keys(cli.responders);
+for (const eventKey of possibleInputs) {
+  if (possibleInputs.includes(eventKey)) {
+    e.on(eventKey, cli.responders[eventKey]);
+  }
+}
+
 // Input processor
 cli.proccesInput = function (str) {
   str = typeof str == "string" && str.trim().length > 0 ? str.trim() : null;
   // Only process the input if the user actually wrote something. Otherwise ignore
   if (str) {
     // Codify the unique strings that identify the unique questions allowed to be asked
-    const ALLOWED_INPUTS = [
-      "man",
-      "help",
-      "exit",
-      "stats",
-      "list users",
-      "more check info",
-      "list logs",
-      "more log info",
-    ];
+    const ALLOWED_INPUTS = Object.keys(cli.responders);
 
     // Go through the possible inputs, emit an event when a match is found
 
@@ -48,8 +86,8 @@ cli.proccesInput = function (str) {
     });
 
     // If no match is found, tell the user to try again
-    if(!matchFound){
-      console.log('Sorry, try again')
+    if (!matchFound) {
+      console.log("Sorry, try again");
     }
   }
 };
