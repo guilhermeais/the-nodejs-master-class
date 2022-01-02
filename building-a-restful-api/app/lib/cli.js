@@ -7,6 +7,8 @@ const readline = require("readline");
 const debug = require("util").debuglog("cli");
 const Events = require("events");
 const { colors } = require("./helpers");
+const { loadavg, cpus, freemem, uptime } = require("os");
+const { getHeapStatistics } = require("v8");
 class _events extends Events {
   constructor() {
     super();
@@ -27,10 +29,50 @@ cli.responders = {
   man: () => {},
   help: () => {},
   exit: function () {
+    console.log("You exit the application");
     process.exit(0);
   },
   stats: function () {
-    console.log("You asked for stats");
+    // Compile and object of stats
+    const stats = {
+      "Load Average": loadavg().join(" "),
+      "CPU Count": cpus().length,
+      "Free Memory": freemem(),
+      "Current Malloced Memory": getHeapStatistics().malloced_memory,
+      "Peak Malloced Memory": getHeapStatistics().peak_malloced_memory,
+      "Allocated Heap Used (%)": Math.round(
+        (getHeapStatistics().used_heap_size /
+          getHeapStatistics().total_heap_size) *
+          100
+      ),
+      "Available Heap Allocated (%)": Math.round(
+        (getHeapStatistics().total_heap_size /
+          getHeapStatistics().heap_size_limit) *
+          100
+      ),
+      Uptime: uptime() + " Seconds",
+    };
+
+    // Show the header for the stats
+    cli.defaultHeader("SYSTEM STATISTICS");
+    // Log out each stat
+    for (const key in stats) {
+      const value = stats[key];
+      let line = colors(key).yellow;
+      const padding = 60 - key.length;
+      for (let i = 0; i < padding; i++) {
+        line += " ";
+      }
+
+      line += value;
+      console.log(line);
+      cli.verticalSpace();
+    }
+
+    cli.verticalSpace(1);
+
+    // End with another horizontal line
+    cli.horizontalLine();
   },
 
   "list users": function () {
@@ -78,25 +120,20 @@ cli.responders.help = function () {
   };
 
   // Show a header fo the help page that is wide as the screen
-  cli.horizontalLine();
-  cli.centered("CLI MANUAL");
-  cli.horizontalLine();
-  cli.verticalSpace(2);
+  cli.defaultHeader("CLI MANUAL");
 
   // Show each command, followed by its exaplanation, in white and yrellow respectively
   for (const key in commands) {
-  
-      const value = commands[key];
-      let line = colors(key).yellow;
-      const padding = (60 - key.length);
-      for (let i = 0; i < padding; i++) {
-        line += " ";
-      }
-     
-      line += value;
-      console.log(line);
-      cli.verticalSpace();
-    
+    const value = commands[key];
+    let line = colors(key).yellow;
+    const padding = 60 - key.length;
+    for (let i = 0; i < padding; i++) {
+      line += " ";
+    }
+
+    line += value;
+    console.log(line);
+    cli.verticalSpace();
   }
 
   cli.verticalSpace(1);
@@ -143,6 +180,17 @@ cli.centered = function (str = "") {
   }
   line += str;
   console.log(line);
+};
+
+// Create a header
+cli.defaultHeader = function (centeredStr = "UPTIME CLI") {
+  if (typeof centeredStr !== "string") {
+    throw new Error("centeredStr should be a string");
+  }
+  cli.horizontalLine();
+  cli.centered(centeredStr);
+  cli.horizontalLine();
+  cli.verticalSpace(2);
 };
 
 // Input handlers
