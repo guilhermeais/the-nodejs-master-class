@@ -118,22 +118,58 @@ cli.responders = {
           // Print the JSON with text highlighting
           cli.verticalSpace();
           console.dir(userData, { colors: true });
-          cli.verticalSpace()
-          return
+          cli.verticalSpace();
+          return;
         } else {
-          console.log("Couldn't find the specified user")
-          return
+          console.log("Couldn't find the specified user");
+          return;
         }
       });
-    
     } else {
       console.log("Invalid user id, please try again passing a valid id.");
-      return
+      return;
     }
   },
 
-  "list checks": function (str) {
-    console.log("You asked for list checks", str);
+  "list checks": function (str = "") {
+    if (typeof str !== "string") {
+      console.log("Sorry. try again");
+    }
+    _data.list("checks", (err, checkIds) => {
+      if (!err && Array.isArray(checkIds) && checkIds.length > 0) {
+        checkIds.forEach((id) => {
+          _data.read("checks", id, (err, checkData) => {
+            let filterChecks = [];
+            let line='';
+
+            if (str.trim().toLowerCase().split("--").includes("up")) {
+              filterChecks.push("up");
+            }
+            if (str.trim().toLowerCase().split("--").includes("down")) {
+              filterChecks.push("down");
+            }
+
+            if (filterChecks.length > 0) {
+              if (filterChecks.includes(checkData.state)) {
+                line += `ID: ${
+                  checkData.id
+                } ${checkData.method.toUpperCase()} ${checkData.protocol}:://${
+                  checkData.url
+                } State: ${checkData.state}`;
+              }
+            } else {
+              line += `ID: ${checkData.id} ${checkData.method.toUpperCase()} ${
+                checkData.protocol
+              }:://${checkData.url} State: ${checkData.state}`;
+            }
+
+            console.log(line);
+            cli.verticalSpace();
+          });
+        });
+      } else {
+      }
+    });
   },
   "more check info": function (str) {
     console.log("You asked for more check info", str);
