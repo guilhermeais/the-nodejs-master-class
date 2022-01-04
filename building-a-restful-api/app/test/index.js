@@ -4,36 +4,19 @@
 
 // Dependencias
 const helpers = require("../lib/helpers");
-const assert = require("assert");
 
 // Application logic for the test runner
 const _app = {};
 
 // Container for the tests
 _app.tests = {
-  unit: {},
+
 };
 
-// Assert that the getANumber function is returning a number
-_app.tests.unit["helpers.getANumber should return number"] = function (done) {
-  const value = helpers.getANumber();
-  assert.equal(typeof value, "number");
-  done();
-};
+// Add on the unit tests
+_app.tests.unit = require('./unit')
 
-// Assert that the getANumber function is returning a number
-_app.tests.unit["helpers.getANumber should return 1"] = function (done) {
-  const value = helpers.getANumber();
-  assert.equal(value, 1);
-  done();
-};
 
-// Assert that the getANumber function is returning a number
-_app.tests.unit["helpers.getANumber should  return 2"] = function (done) {
-  const value = helpers.getANumber();
-  assert.equal(value, 2);
-  done();
-};
 
 // Count all the tests
 _app.countTests = function () {
