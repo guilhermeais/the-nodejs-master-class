@@ -13,6 +13,11 @@ const fs = require("fs");
 // Container for all the helpers
 const helpers = {};
 
+// Sample for testing that simply returns number a number
+helpers.getANumber = function () {
+  return 1;
+}
+
 // Color for the console
 helpers.colors = function (str='') {
   if (typeof str !== 'string') {
@@ -23,6 +28,7 @@ helpers.colors = function (str='') {
     red: `\x1b[31m${str&&str.length>0?str:'%s'}\x1b[0m`,
     darkBlue: `\x1b[34m${str&&str.length>0?str:'%s'}\x1b[0m`,
     yellow: `\x1b[33m${str&&str.length>0?str:'%s'}\x1b[0m`,
+    green: `\x1b[32m${str&&str.length>0?str:'%s'}\x1b[0m`,
   };
 };
 
