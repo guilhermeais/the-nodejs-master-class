@@ -6,7 +6,7 @@
 const readline = require("readline");
 const debug = require("util").debuglog("cli");
 const Events = require("events");
-const { colors } = require("./helpers");
+const { colors, parseJsonToObject } = require("./helpers");
 const { loadavg, cpus, freemem, uptime } = require("os");
 const { getHeapStatistics } = require("v8");
 const _data = require("./data");
@@ -141,7 +141,7 @@ cli.responders = {
         checkIds.forEach((id) => {
           _data.read("checks", id, (err, checkData) => {
             let filterChecks = [];
-            let line='';
+            let line = "";
 
             if (str.trim().toLowerCase().split("--").includes("up")) {
               filterChecks.push("up");
@@ -183,8 +183,6 @@ cli.responders = {
       // Lookup the user
       _data.read("checks", checkId, (err, checkData) => {
         if (!err && checkData) {
-     
-
           // Print the JSON with text highlighting
           cli.verticalSpace();
           console.dir(checkData, { colors: true });
@@ -202,20 +200,51 @@ cli.responders = {
   },
 
   "list logs": function () {
-    _logs.list(true, (err, logFileNames)=>{
-      if (!err && Array.isArray(logFileNames) ) {
+    _logs.list(true, (err, logFileNames) => {
+      if (!err && Array.isArray(logFileNames)) {
         cli.verticalSpace();
-        logFileNames.forEach(name=>{
-          if (name.indexOf('-')>-1) {
-            console.log(name)
-            cli.verticalSpace()
+        logFileNames.forEach((name) => {
+          if (name.indexOf("-") > -1) {
+            console.log(name);
+            cli.verticalSpace();
           }
-        })
+        });
       }
-    })
+    });
   },
   "more log info": function (str) {
-    console.log("You asked for more log info", str);
+
+    if (typeof str !== "string" && str.trim().length > 0) {
+      console.log("The ID is invalid.");
+      return;
+    }
+    // Get the ID from the string
+    const logFileName = str.split("--")[1].trim();
+    if (logFileName) {
+      // Lookup the user
+      cli.verticalSpace();
+      // Decompress the log file
+      _logs.decompress(logFileName, (err, strData)=>{
+        if (!err && strData) {
+          // Split into lines 
+          const arr = strData.split('\n')
+          arr.forEach((jsonString)=>{
+           if (jsonString != '{}') {
+            const logObject =   parseJsonToObject(jsonString)
+            if (logObject && typeof logObject == 'object') {
+              console.dir(logObject, { colors: true})
+              cli.verticalSpace()
+            }
+           }
+          })
+        } else {
+          
+        }
+      })
+    } else {
+      console.log("Invalid check id, please try again passing a valid id.");
+      return;
+    }
   },
 };
 
