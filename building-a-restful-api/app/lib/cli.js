@@ -10,6 +10,7 @@ const { colors } = require("./helpers");
 const { loadavg, cpus, freemem, uptime } = require("os");
 const { getHeapStatistics } = require("v8");
 const _data = require("./data");
+const _logs = require("./logs");
 class _events extends Events {
   constructor() {
     super();
@@ -201,7 +202,17 @@ cli.responders = {
   },
 
   "list logs": function () {
-    console.log("You asked for list logs");
+    _logs.list(true, (err, logFileNames)=>{
+      if (!err && Array.isArray(logFileNames) ) {
+        cli.verticalSpace();
+        logFileNames.forEach(name=>{
+          if (name.indexOf('-')>-1) {
+            console.log(name)
+            cli.verticalSpace()
+          }
+        })
+      }
+    })
   },
   "more log info": function (str) {
     console.log("You asked for more log info", str);
@@ -226,7 +237,7 @@ cli.responders.help = function () {
     "more check info --{checkId}": "Show details of a specified check",
 
     "list logs":
-      "Show a list of all the log files available to be read (compressed and uncompressed)",
+      "Show a list of all the log files available to be read (compressed only)",
     "more log info --{fileName}": "Show details of a specified log file",
   };
 
