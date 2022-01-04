@@ -172,7 +172,32 @@ cli.responders = {
     });
   },
   "more check info": function (str) {
-    console.log("You asked for more check info", str);
+    if (typeof str !== "string" && str.trim().length > 0) {
+      console.log("The ID is invalid.");
+      return;
+    }
+    // Get the ID from the string
+    const checkId = str.split("--")[1].trim();
+    if (checkId) {
+      // Lookup the user
+      _data.read("checks", checkId, (err, checkData) => {
+        if (!err && checkData) {
+     
+
+          // Print the JSON with text highlighting
+          cli.verticalSpace();
+          console.dir(checkData, { colors: true });
+          cli.verticalSpace();
+          return;
+        } else {
+          console.log("Couldn't find the specified check");
+          return;
+        }
+      });
+    } else {
+      console.log("Invalid check id, please try again passing a valid id.");
+      return;
+    }
   },
 
   "list logs": function () {
