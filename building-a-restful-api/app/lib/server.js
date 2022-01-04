@@ -20,19 +20,43 @@ const debug = debuglog("server");
 const server = {};
 
 // Global variables
-const _colors = Object.assign(helpers.colors())
+const _colors = Object.assign(helpers.colors());
 const _parseString = (value) => (typeof value === "string" ? value : "");
 const POSSIBLES_CONTENT_TYPES = {
   json: { type: "application/json", parse: (value) => JSON.stringify(value) },
   html: { type: "text/html", parse: _parseString },
-  css: { type: "text/css", parse:  (value)=>value&&typeof value !=='undefined'?value:null  },
-  png: { type: "image/png", parse: (value)=>value&&typeof value !=='undefined'?value:null },
-  jpeg: { type: "image/jpeg", parse: (value)=>value&&typeof value !=='undefined'?value:null },
-  jpg: { type: "image/jpeg", parse: (value)=>value&&typeof value !=='undefined'?value:null },
-  favicon: { type: "image/x-icon", parse: (value)=>value&&typeof value !=='undefined'?value:null },
-  plain: { type: "text/plain",  parse:(value)=>value&&typeof value !=='undefined'?value:null },
-  js: { type: "application/javascript",  parse:(value)=>value&&typeof value !=='undefined'?value:null},
-  _default: { type: "text/plain", parse:(value)=>value&&typeof value !=='undefined'?value:null },
+  css: {
+    type: "text/css",
+    parse: (value) => (value && typeof value !== "undefined" ? value : null),
+  },
+  png: {
+    type: "image/png",
+    parse: (value) => (value && typeof value !== "undefined" ? value : null),
+  },
+  jpeg: {
+    type: "image/jpeg",
+    parse: (value) => (value && typeof value !== "undefined" ? value : null),
+  },
+  jpg: {
+    type: "image/jpeg",
+    parse: (value) => (value && typeof value !== "undefined" ? value : null),
+  },
+  favicon: {
+    type: "image/x-icon",
+    parse: (value) => (value && typeof value !== "undefined" ? value : null),
+  },
+  plain: {
+    type: "text/plain",
+    parse: (value) => (value && typeof value !== "undefined" ? value : null),
+  },
+  js: {
+    type: "application/javascript",
+    parse: (value) => (value && typeof value !== "undefined" ? value : null),
+  },
+  _default: {
+    type: "text/plain",
+    parse: (value) => (value && typeof value !== "undefined" ? value : null),
+  },
 };
 
 // All the server logic for both the http and https server
@@ -69,8 +93,9 @@ server.unifiedServer = function (request, response) {
         ? server.router[trimmedPath]
         : handlers.notFound;
 
-        // If ther equest is within the public directory, use the public handler instead
-        cosenHandler = trimmedPath.indexOf('public') > -1?handlers.public : cosenHandler
+    // If ther equest is within the public directory, use the public handler instead
+    cosenHandler =
+      trimmedPath.indexOf("public") > -1 ? handlers.public : cosenHandler;
 
     // Construct the data object to send to the handler
     const data = {
@@ -82,32 +107,71 @@ server.unifiedServer = function (request, response) {
     };
 
     // Route the request to the hadler specified in the router
-    cosenHandler(
-      data,
-      function (statusCode = 200, payload = {}, contentType = "json") {
-        // Return the response-parts that are content-specific
-        response.setHeader(
-          "Content-Type",
-          POSSIBLES_CONTENT_TYPES[contentType?contentType:'_default'].type
-        );
 
-        let payloadString = POSSIBLES_CONTENT_TYPES[contentType?contentType:'_default'].parse(payload);
-         // console.log('payload string', payloadString);
-        // Return the response-parts that are common to all content-types
-        response.writeHead(statusCode);
-        response.end(payloadString);
-        // Log the request path
-        // if the response is 200/201, print green otherwise print red
-
-        const _color = [200, 201].includes(statusCode)
-          ? _colors["green"]
-          : _colors["red"];
-
-        debug(_color, `${method.toUpperCase()}/${trimmedPath} ${statusCode}`);
-        // debug("Returning this response: ", statusCode, payloadString);
-      }
-    );
+    try {
+      cosenHandler(
+        data,
+        (statusCode = 200, payload = {}, contentType = "json") => {
+          server.processHandlerResponse(
+            response,
+            method,
+            trimmedPath,
+            statusCode,
+            payload,
+            contentType
+          );
+        }
+      );
+    } catch (error) {
+      server.processHandlerResponse(
+        response,
+        method,
+        trimmedPath,
+        500,
+        { Error: "An unknown error has ocurred" },
+        "json"
+      );
+    }
   });
+};
+// Process the response from the handler
+server.processHandlerResponse = function (
+  response,
+  method,
+  trimmedPath,
+  statusCode = 200,
+  payload = {},
+  contentType = "json"
+) {
+  try {
+    // Return the response-parts that are content-specific
+    response.setHeader(
+      "Content-Type",
+      POSSIBLES_CONTENT_TYPES[contentType ? contentType : "_default"].type
+    );
+
+    let payloadString =
+      POSSIBLES_CONTENT_TYPES[contentType ? contentType : "_default"].parse(
+        payload
+      );
+    // console.log('payload string', payloadString);
+    // Return the response-parts that are common to all content-types
+    response.writeHead(statusCode);
+    response.end(payloadString);
+    // Log the request path
+    // if the response is 200/201, print green otherwise print red
+
+    const _color = [200, 201].includes(statusCode)
+      ? _colors["green"]
+      : _colors["red"];
+
+    debug(_color, `${method.toUpperCase()}/${trimmedPath} ${statusCode}`);
+    // debug("Returning this response: ", statusCode, payloadString);
+  } catch (error) {
+    response.writeHead(500);
+    response.setHeader("Content-Type", POSSIBLES_CONTENT_TYPES.json.type);
+    response.end({ Error: "An unknown error has ocurred" });
+  }
 };
 
 // Define a request router
@@ -127,7 +191,9 @@ server.router = {
   "api/tokens": handlers.tokens,
   "api/checks": handlers.checks,
   "favicon.ico": handlers.favicon,
-  'public': handlers.public,
+  public: handlers.public,
+
+  "examples/error": handlers.exampleError,
 };
 
 // Instantiate the HTTP server

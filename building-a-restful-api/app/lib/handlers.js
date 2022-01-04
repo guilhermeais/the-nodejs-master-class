@@ -402,6 +402,12 @@ handlers.public = function (data, callback) {
  * @param {Function} callback
  */
 
+// Example Error
+handlers.exampleError = function (data, callback) {
+  let err = new Error('This is an example error')
+  throw err
+};
+
 // Users
 handlers.users = function (data, callback) {
   const accetableMethods = ["post", "get", "put", "delete"];

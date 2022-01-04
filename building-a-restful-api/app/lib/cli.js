@@ -229,7 +229,7 @@ cli.responders = {
           // Split into lines 
           const arr = strData.split('\n')
           arr.forEach((jsonString)=>{
-           if (jsonString != '{}') {
+           if (jsonString !== '{}') {
             const logObject =   parseJsonToObject(jsonString)
             if (logObject && typeof logObject == 'object') {
               console.dir(logObject, { colors: true})
