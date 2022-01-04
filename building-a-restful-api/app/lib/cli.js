@@ -94,7 +94,7 @@ cli.responders = {
               }.`;
 
               console.log(line);
-              cli.verticalSpace()
+              cli.verticalSpace();
             }
           });
         });
@@ -102,7 +102,34 @@ cli.responders = {
     });
   },
   "more user info": function (str) {
-    console.log("You asked for more user info", str);
+    if (typeof str !== "string" && str.trim().length > 0) {
+      console.log("The ID is invalid.");
+      return;
+    }
+    // Get the ID from the string
+    const userId = str.split("--")[1].trim();
+    if (userId) {
+      // Lookup the user
+      _data.read("users", userId, (err, userData) => {
+        if (!err && userData) {
+          // Remove the hashed password
+          delete userData.hashPassword;
+
+          // Print the JSON with text highlighting
+          cli.verticalSpace();
+          console.dir(userData, { colors: true });
+          cli.verticalSpace()
+          return
+        } else {
+          console.log("Couldn't find the specified user")
+          return
+        }
+      });
+    
+    } else {
+      console.log("Invalid user id, please try again passing a valid id.");
+      return
+    }
   },
 
   "list checks": function (str) {
