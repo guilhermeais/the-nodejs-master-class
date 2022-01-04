@@ -49,6 +49,26 @@ enviroments.production = {
   }
 };
 
+// Testing enviroment
+enviroments.testing = {
+  httpPort: 4000,
+  httpsPort: 4001,
+  envName: "testing",
+  hashingSecret: "thisIsAlsoASecret",
+  maxChecks: 5,
+  twilio: {
+    accountSid: "AC48a5a360f72fb848d2660a78010df699",
+    authToken: "8f84d4c428d0725582b96894e7d3d3a5",
+    fromPhone: "+5516993299116",
+  },
+  templateGlobals: {
+    appName: 'uptimeChecker',
+    companyName: 'NotARealCompany. Inc',
+    yearCreated: '2021',
+    baseUrl:`http://localhost:3000`
+  }
+};
+
 // Determine which environment was passed as comamand-line argument
 const currentEnviroment =
   typeof proccess.env.NODE_ENV == "string"

@@ -383,8 +383,8 @@ cli.proccesInput = function (str) {
 // Init script
 cli.init = function () {
   // Send the start message to the console, in dark blue
-  console.log(colors().darkBlue, "The CLI is running");
-
+    console.log(colors().darkBlue, "The CLI is running");
+  
   // Start the interface
   const _interface = readline.createInterface({
     input: process.stdin,

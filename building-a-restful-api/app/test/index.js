@@ -1,8 +1,11 @@
 /**
  * Test runner
- */
+*/
 
-// Dependencias
+// Override the NODE_ENV variable
+process.env.NODE_ENV = 'testing';
+
+// Dependencies
 const helpers = require("../lib/helpers");
 
 // Application logic for the test runner
@@ -10,11 +13,11 @@ const _app = {};
 
 // Container for the tests
 _app.tests = {
-
+  // Add on the unit tests
+  unit: require('./unit'),
+  api: require('./api')
 };
 
-// Add on the unit tests
-_app.tests.unit = require('./unit')
 
 
 
@@ -54,12 +57,12 @@ _app.runTests = function () {
             const testValue = subTests[testName];
             
             // Call the test
-            counter++;
+          
             try {
               testValue(() => {
                 // If it calls back without throwin, then it succeded, so log it in green
                 console.log(helpers.colors(tmpTestName).green);
-              
+                counter++;
                 successes++;
                 if (counter == limit) {
                   _app.produceTestReport(limit, successes, errors);
@@ -71,6 +74,7 @@ _app.runTests = function () {
                 name: testName,
                 error: e,
               });
+              counter++;
               console.log(helpers.colors(tmpTestName).red);
               if (counter == limit) {
                 _app.produceTestReport(limit, successes, errors);
@@ -104,6 +108,7 @@ _app.produceTestReport = function (limit = 0, successes = 0, errors = []) {
     );
   }
   console.log("\n--------------------END TEST REPORT--------------------\n");
+  process.exit(0)
 };
 
 // Run the tests

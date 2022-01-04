@@ -12,7 +12,7 @@ const cli = require("./lib/cli");
 const app = {};
 
 // Init function
-app.init = function () {
+app.init = function (callback) {
   // Start the server
   server.init();
 
@@ -20,11 +20,16 @@ app.init = function () {
   workers.init();
 
   // Start the CLI, but make sure it starts last
-  setTimeout(() => cli.init(), 50);
+  setTimeout(() => {
+    cli.init();
+    callback(true);
+  }, 50);
 };
 
-// Execute
-app.init();
+// Self invoking only if required directly
+if (require.main === module) {
+  app.init(() => {});
+}
 
 // const EVENTS = ['SIGTERM', 'SIGINT','SIGQUIT']
 
